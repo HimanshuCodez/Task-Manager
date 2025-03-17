@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Banners from './components/Banner';
 import Footer from './components/Footer';
+import Dashboard from './pages/Dashboard';
 
 
 // Placeholder components for other routes
@@ -27,6 +28,7 @@ const App = () => {
             }
           />
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/about" element={<About />} />
         </Routes>
       </main>

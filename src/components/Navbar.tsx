@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, X, CheckSquare, Bell, User, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,9 +18,9 @@ const Navbar = () => {
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
-                <a href="#" className="px-3 py-2 rounded-md text-sm font-medium text-indigo-600 bg-gray-50 dark:bg-gray-700 dark:text-white transition-all hover:bg-gray-100 dark:hover:bg-gray-600">
+                <Link to="/dashboard" className="px-3 py-2 rounded-md text-sm font-medium text-indigo-600 bg-gray-50 dark:bg-gray-700 dark:text-white transition-all hover:bg-gray-100 dark:hover:bg-gray-600">
                   Dashboard
-                </a>
+                </Link>
                 <a href="#" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
                   Projects
                 </a>

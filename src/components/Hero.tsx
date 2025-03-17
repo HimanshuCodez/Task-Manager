@@ -82,9 +82,9 @@ const Hero = () => {
                 }}
               />
               <img 
-                src="/api/placeholder/800/600" 
+                src="https://www.manageengine.com/products/service-desk/images/banner-main-object.png" 
                 alt="Task Management Dashboard" 
-                className="rounded-lg shadow-xl relative z-10 w-full object-cover"
+                className="rounded-lg shadow-xl relative z-10 w-80 object-cover"
               />
             </div>
           </motion.div>

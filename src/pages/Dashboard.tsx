@@ -1,276 +1,229 @@
-import React, { useState } from 'react';
-import { 
-  BarChart, 
-  CheckCircle, 
-  Clock, 
-  Calendar, 
-  ChevronRight, 
-  Plus, 
-  Users, 
-  MoreVertical,
-  ArrowUp,
-  ArrowDown,
-  Star,
-  Filter,
-  Search
-} from 'lucide-react';
+// src/pages/Dashboard.tsx
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input'; // Shadcn Input
+import {
+  CheckCircle2,
+  Plus,
+  Trash2,
+  BarChart2,
+  Clock,
+  Zap,
+} from 'lucide-react';
 
-// Sample data for charts
-const productivityData = [
-  { name: 'Mon', completed: 5, pending: 2 },
-  { name: 'Tue', completed: 7, pending: 3 },
-  { name: 'Wed', completed: 4, pending: 6 },
-  { name: 'Thu', completed: 8, pending: 1 },
-  { name: 'Fri', completed: 6, pending: 2 },
-  { name: 'Sat', completed: 3, pending: 1 },
-  { name: 'Sun', completed: 2, pending: 0 }
-];
-
-const projectData = [
-  { name: 'Website Redesign', value: 35 },
-  { name: 'App Development', value: 25 },
-  { name: 'Marketing', value: 20 },
-  { name: 'Research', value: 15 },
-  { name: 'Other', value: 5 }
-];
-
-const COLORS = ['#4f46e5', '#7c3aed', '#2563eb', '#d946ef', '#8b5cf6'];
+// Dummy task data (replace with real data later)
+interface Task {
+  id: number;
+  title: string;
+  completed: boolean;
+}
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  
-  // For task filtering
-  const [filter, setFilter] = useState('all');
-  
-  // Sample tasks
-  const tasks = [
-    { id: 1, title: 'Finalize dashboard design', status: 'in-progress', priority: 'high', dueDate: '2025-03-20', assignee: 'Alex Thompson' },
-    { id: 2, title: 'Create user documentation', status: 'pending', priority: 'medium', dueDate: '2025-03-25', assignee: 'Morgan Lee' },
-    { id: 3, title: 'Deploy new features', status: 'in-progress', priority: 'high', dueDate: '2025-03-19', assignee: 'Jamie Wilson' },
-    { id: 4, title: 'QA testing', status: 'completed', priority: 'medium', dueDate: '2025-03-15', assignee: 'Sam Rodriguez' },
-    { id: 5, title: 'Client meeting preparation', status: 'pending', priority: 'low', dueDate: '2025-03-22', assignee: 'Taylor Kim' }
-  ];
-  
-  // Filter tasks based on selected filter
-  const filteredTasks = filter === 'all' 
-    ? tasks 
-    : tasks.filter(task => task.status === filter);
-  
-  // Task status count for KPIs
-  const taskCounts = {
-    total: tasks.length,
-    completed: tasks.filter(t => t.status === 'completed').length,
-    inProgress: tasks.filter(t => t.status === 'in-progress').length,
-    pending: tasks.filter(t => t.status === 'pending').length
+  const [tasks, setTasks] = useState<Task[]>([
+    { id: 1, title: 'Finish project proposal', completed: false },
+    { id: 2, title: 'Review team feedback', completed: true },
+    { id: 3, title: 'Plan sprint meeting', completed: false },
+  ]);
+  const [newTask, setNewTask] = useState('');
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 },
+    },
   };
 
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  };
+
+  // Add task handler
+  const addTask = () => {
+    if (newTask.trim()) {
+      setTasks([...tasks, { id: Date.now(), title: newTask, completed: false }]);
+      setNewTask('');
+    }
+  };
+
+  // Toggle task completion
+  const toggleTask = (id: number) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
+
+  // Delete task handler
+  const deleteTask = (id: number) => {
+    setTasks(tasks.filter((task) => task.id !== id));
+  };
+
+  // Progress calculation
+  const completedTasks = tasks.filter((task) => task.completed).length;
+  const progress = tasks.length ? (completedTasks / tasks.length) * 100 : 0;
+
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Dashboard Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">Welcome back! Here's what's happening with your projects.</p>
-          </div>
-          <div className="mt-4 md:mt-0 flex space-x-3">
-            <motion.button 
-              className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center shadow-sm hover:shadow transition-shadow"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 py-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          className="space-y-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Header */}
+          <motion.div variants={itemVariants}>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-indigo-900 text-center">
+              Your Productivity <span className="text-orange-400">Dashboard</span>
+            </h1>
+            <p className="mt-2 text-lg text-indigo-600 text-center">
+              Stay on top of your tasks with ease.
+            </p>
+          </motion.div>
+
+          {/* Quick Add Task */}
+          <motion.div
+            className="bg-white rounded-2xl shadow-lg p-6 flex flex-col sm:flex-row gap-4"
+            variants={itemVariants}
+          >
+            <Input
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              placeholder="Add a new task..."
+              className="flex-grow border-indigo-200 focus:ring-orange-400"
+              onKeyDown={(e) => e.key === 'Enter' && addTask()}
+            />
+            <Button
+              onClick={addTask}
+              className="bg-orange-400 text-indigo-900 hover:bg-orange-300 rounded-full flex items-center gap-2 px-6"
             >
-              <Filter size={16} className="mr-2" />
-              View Reports
-            </motion.button>
-            <motion.button 
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center shadow-sm hover:bg-indigo-700 transition-colors"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              <Plus size={20} />
+              Add
+            </Button>
+          </motion.div>
+
+          {/* Dashboard Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Task List */}
+            <motion.div
+              className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6"
+              variants={itemVariants}
             >
-              <Plus size={16} className="mr-2" />
-              New Task
-            </motion.button>
-          </div>
-        </div>
-        
-        {/* Dashboard Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-t-lg border-b border-gray-200 dark:border-gray-700 mb-6">
-          <nav className="flex space-x-8 px-4">
-            {['overview', 'projects', 'tasks', 'team'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab
-                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </nav>
-        </div>
-        
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <motion.div 
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-100 dark:border-gray-700"
-            whileHover={{ y: -5, transition: { duration: 0.2 } }}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Tasks</p>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{taskCounts.total}</h3>
-              </div>
-              <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-lg">
-                <BarChart className="text-indigo-600 dark:text-indigo-400" size={24} />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-500 flex items-center">
-                <ArrowUp size={14} className="mr-1" />
-                12%
-              </span>
-              <span className="text-gray-500 dark:text-gray-400 ml-2">from last week</span>
-            </div>
-          </motion.div>
-          
-          <motion.div 
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-100 dark:border-gray-700"
-            whileHover={{ y: -5, transition: { duration: 0.2 } }}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{taskCounts.completed}</h3>
-              </div>
-              <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
-                <CheckCircle className="text-green-600 dark:text-green-400" size={24} />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-500 flex items-center">
-                <ArrowUp size={14} className="mr-1" />
-                8%
-              </span>
-              <span className="text-gray-500 dark:text-gray-400 ml-2">from last week</span>
-            </div>
-          </motion.div>
-          
-          <motion.div 
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-100 dark:border-gray-700"
-            whileHover={{ y: -5, transition: { duration: 0.2 } }}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">In Progress</p>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{taskCounts.inProgress}</h3>
-              </div>
-              <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
-                <Clock className="text-blue-600 dark:text-blue-400" size={24} />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-yellow-500 flex items-center">
-                <ArrowUp size={14} className="mr-1" />
-                5%
-              </span>
-              <span className="text-gray-500 dark:text-gray-400 ml-2">from last week</span>
-            </div>
-          </motion.div>
-          
-          <motion.div 
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-100 dark:border-gray-700"
-            whileHover={{ y: -5, transition: { duration: 0.2 } }}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{taskCounts.pending}</h3>
-              </div>
-              <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
-                <Calendar className="text-purple-600 dark:text-purple-400" size={24} />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-red-500 flex items-center">
-                <ArrowDown size={14} className="mr-1" />
-                3%
-              </span>
-              <span className="text-gray-500 dark:text-gray-400 ml-2">from last week</span>
-            </div>
-          </motion.div>
-        </div>
-        
-        {/* Charts and Tasks Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Productivity Chart */}
-          <motion.div 
-            className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-100 dark:border-gray-700"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Weekly Productivity</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={productivityData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-                <XAxis dataKey="name" stroke="#6B7280" />
-                <YAxis stroke="#6B7280" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-                    borderRadius: '0.375rem',
-                    border: '1px solid #E5E7EB',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }} 
-                />
-                <Legend />
-                <Line type="monotone" dataKey="completed" stroke="#4F46E5" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="pending" stroke="#EC4899" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </motion.div>
-          
-          {/* Project Distribution */}
-          <motion.div 
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-100 dark:border-gray-700"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Project Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={projectData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              <h2 className="text-2xl font-semibold text-indigo-900 mb-4 flex items-center gap-2">
+                <Clock size={24} className="text-orange-400" />
+                Tasks
+              </h2>
+              <ul className="space-y-4 max-h-96 overflow-y-auto">
+                {tasks.map((task) => (
+                  <motion.li
+                    key={task.id}
+                    className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg group"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => toggleTask(task.id)}
+                        className="focus:outline-none"
+                      >
+                        <CheckCircle2
+                          size={20}
+                          className={`${
+                            task.completed
+                              ? 'text-orange-400'
+                              : 'text-gray-400'
+                          } hover:text-orange-300 transition-colors`}
+                        />
+                      </button>
+                      <span
+                        className={`${
+                          task.completed
+                            ? 'line-through text-gray-500'
+                            : 'text-indigo-900'
+                        }`}
+                      >
+                        {task.title}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteTask(task.id)}
+                      className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 transition-opacity"
+                    >
+                      <Trash2 size={18} />
+                    </Button>
+                  </motion.li>
+                ))}
+                {tasks.length === 0 && (
+                  <p className="text-gray-500 text-center">No tasks yet—add one!</p>
+                )}
+              </ul>
+            </motion.div>
+
+            {/* Progress Overview */}
+            <motion.div
+              className="bg-white rounded-2xl shadow-lg p-6"
+              variants={itemVariants}
+            >
+              <h2 className="text-2xl font-semibold text-indigo-900 mb-4 flex items-center gap-2">
+                <BarChart2 size={24} className="text-orange-400" />
+                Progress
+              </h2>
+              <div className="space-y-6 text-center">
+                <motion.div
+                  className="relative w-32 h-32 mx-auto"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
                 >
-                  {projectData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value) => [`${value}%`, 'Allocation']}
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-                    borderRadius: '0.375rem',
-                    border: '1px solid #E5E7EB',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </motion.div>
-        </div>
-        
-        {/* Tasks
+                  <svg className="w-full h-full" viewBox="0 0 36 36">
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#e5e7eb"
+                      strokeWidth="3"
+                    />
+                    <motion.path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#f97316"
+                      strokeWidth="3"
+                      strokeDasharray={`${progress}, 100`}
+                      initial={{ strokeDasharray: '0, 100' }}
+                      animate={{ strokeDasharray: `${progress}, 100` }}
+                      transition={{ duration: 1.5, ease: 'easeInOut' }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-indigo-900">
+                      {Math.round(progress)}%
+                    </span>
+                  </div>
+                </motion.div>
+                <p className="text-indigo-600">
+                  {completedTasks} of {tasks.length} tasks completed
+                </p>
+                <Button
+                  variant="outline"
+                  className="border-orange-400 text-orange-400 hover:bg-orange-100 rounded-full flex items-center gap-2"
+                >
+                  <Zap size={18} />
+                  Boost Now
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
